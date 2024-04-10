@@ -48,3 +48,6 @@ packages/
 coverage.json
 coveragereport/
 */coverage.cobertura.xml
+
+# specific files
+*/drivers/*

@@ -175,9 +175,9 @@ namespace BrowserAutomation
 
                 if(isInLogginAgain)
                 {
-                    utils.enterText("F1:username", Secret.CUIT);
+                    utils.enterText("F1:username", TestContext.Parameters["CUIT"]);
                     utils.clickOnElement("F1:btnSiguiente");
-                    utils.enterText("F1:password", Secret.ACCESS);
+                    utils.enterText("F1:password", TestContext.Parameters["ACCESS"]);
                     utils.clickOnElement("F1:btnIngresar");
 
                     Thread.Sleep(1000);
