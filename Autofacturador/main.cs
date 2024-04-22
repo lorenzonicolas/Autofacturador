@@ -15,7 +15,7 @@ namespace BrowserAutomation
         private int MAX_FACTURA_SIN_DNI;
         private string CUIT;
         private string ACCESS;
-        private IWebDriver driver;
+        private ChromeDriver driver;
         private DOMUtils utils;
 
         [SetUp]
@@ -29,17 +29,18 @@ namespace BrowserAutomation
         }
 
         [Test]
-        [TestCase("01/04/2024", TipoDeFactura.ClasesParticulares)]
-        [TestCase("02/04/2024", TipoDeFactura.Asesoria_Performance)]
-        [TestCase("03/04/2024", TipoDeFactura.ClasesParticulares)]
-        [TestCase("04/04/2024", TipoDeFactura.Asesoria_SeguridadWeb)]
-        [TestCase("05/04/2024", TipoDeFactura.ClasesParticulares)]
+        [TestCase("15/04/2024", TipoDeFactura.ClasesParticulares)]
+        // [TestCase("09/04/2024", TipoDeFactura.Asesoria_Performance)]
+        [TestCase("17/04/2024", TipoDeFactura.ClasesParticulares)]
+        // [TestCase("11/04/2024", TipoDeFactura.Asesoria_SeguridadWeb)]
+        [TestCase("19/04/2024", TipoDeFactura.ClasesParticulares)]
+        
         public void GenerarFactura(string fechaComprobante, TipoDeFactura tipoFactura)
         {
-            MONOTRIBUTO_URL = TestContext.Parameters["MONOTRIBUTO_URL"];
-            MAX_FACTURA_SIN_DNI = int.Parse(TestContext.Parameters["MAX_FACTURA_SIN_DNI"]);
-            CUIT = TestContext.Parameters["CUIT"];
-            ACCESS = TestContext.Parameters["ACCESS"];
+            MONOTRIBUTO_URL = GetConfigKey("MONOTRIBUTO_URL");
+            MAX_FACTURA_SIN_DNI = int.Parse(GetConfigKey("MAX_FACTURA_SIN_DNI"));
+            CUIT = GetConfigKey("CUIT");
+            ACCESS = GetConfigKey("ACCESS");
             
             if (!DateTime.TryParseExact(fechaComprobante, "d", new CultureInfo("es-ES"), DateTimeStyles.AssumeLocal, out _))
             {
@@ -75,7 +76,7 @@ namespace BrowserAutomation
         private void Paso_4_ValidarFactura(Factura factura)
         {
             var domicilio = driver.FindElement(By.XPath("//html/body/div[2]/form/div[2]/table/tbody/tr[3]/td/table/tbody/tr[2]/td")).Text;
-            Assert.IsTrue(domicilio.ToLowerInvariant().Contains(TestContext.Parameters["DOMICILIO"]));
+            Assert.IsTrue(domicilio.ToLowerInvariant().Contains(GetConfigKey("DOMICILIO")));
 
             var concepto = driver.FindElement(By.XPath("//html/body/div[2]/form/div[2]/table/tbody/tr[3]/td/table/tbody/tr[3]/td")).Text;
             Assert.AreEqual("servicios", concepto.ToLowerInvariant());
@@ -142,7 +143,7 @@ namespace BrowserAutomation
             // Click en Generar comprobante
             utils.clickOnElement("btn_gen_cmp");
             // Select punto de venta
-            utils.clickOnSelectElement("puntodeventa", TestContext.Parameters["PUNTO_DE_VENTA"]);
+            utils.clickOnSelectElement("puntodeventa", GetConfigKey("PUNTO_DE_VENTA"));
 
             Thread.Sleep(500);
             var selectedTipoDeComprobante = new SelectElement(driver.FindElement(By.Id("universocomprobante"))).SelectedOption.Text;
@@ -175,9 +176,9 @@ namespace BrowserAutomation
 
                 if(isInLogginAgain)
                 {
-                    utils.enterText("F1:username", TestContext.Parameters["CUIT"]);
+                    utils.enterText("F1:username", GetConfigKey("CUIT"));
                     utils.clickOnElement("F1:btnSiguiente");
-                    utils.enterText("F1:password", TestContext.Parameters["ACCESS"]);
+                    utils.enterText("F1:password", GetConfigKey("ACCESS"));
                     utils.clickOnElement("F1:btnIngresar");
 
                     Thread.Sleep(1000);
@@ -198,6 +199,11 @@ namespace BrowserAutomation
             utils.enterTextByXPath($"{baseXPath}/tr[{selector}]/td[3]/input", factura.CantidadHoras);
             utils.clickOnSelectElementByXPath($"{baseXPath}/tr[{selector}]/td[4]/select", "unidades");
             utils.enterTextByXPath($"{baseXPath}/tr[{selector}]/td[5]/input", factura.PrecioPorHora);
+        }
+
+        private static string GetConfigKey (string key)
+        {
+            return TestContext.Parameters[key.ToUpper()] ?? throw new Exception($"Key not found in config: {key}");
         }
 
         [OneTimeTearDown]
