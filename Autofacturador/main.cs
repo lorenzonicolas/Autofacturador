@@ -1,3 +1,4 @@
+using BrowserAutomation;
 using NUnit.Framework;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
@@ -7,7 +8,7 @@ using System.Globalization;
 using System.IO;
 using System.Threading;
 
-namespace BrowserAutomation
+namespace Autofacturador
 {
     public partial class Tests
     {
@@ -201,16 +202,16 @@ namespace BrowserAutomation
             utils.enterTextByXPath($"{baseXPath}/tr[{selector}]/td[5]/input", factura.PrecioPorHora);
         }
 
-        private static string GetConfigKey (string key)
-        {
-            return TestContext.Parameters[key.ToUpper()] ?? throw new Exception($"Key not found in config: {key}");
-        }
-
         [OneTimeTearDown]
         public void TearDown()
         {
             // Closes the browser
             //driver.Quit();
         }
-    }
+
+        public static string GetConfigKey (string key)
+        {
+            return TestContext.Parameters[key.ToUpper()] ?? throw new Exception($"Key not found in config: {key}");
+        }
+    }    
 }

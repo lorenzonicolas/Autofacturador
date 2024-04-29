@@ -16,7 +16,7 @@
     <PackageReference Include="System.Configuration.ConfigurationManager" Version="5.0.0" />
     <PackageReference Include="NLL.BrowserUtils" Version="1.0.0" />
 
-    <Content Update="config.runsettings">
+    <Content Include="config.runsettings">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
