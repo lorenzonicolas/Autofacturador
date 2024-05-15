@@ -1,4 +1,4 @@
-﻿namespace BrowserAutomation
+﻿namespace Autofacturador
 {
     public enum TipoDeFactura
     {

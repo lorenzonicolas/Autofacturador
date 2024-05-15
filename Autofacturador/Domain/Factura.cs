@@ -1,24 +1,14 @@
 ﻿using NUnit.Framework;
 
-namespace BrowserAutomation
+namespace Autofacturador
 {
-    public class Factura
+    public class Factura(TipoDeFactura tipoFactura)
     {
-        public string Codigo { get; set; }
-        public int CantidadHoras { get; set; }
-        public int CantidadItems { get; set; }
-        public int PrecioPorHora { get; set; }
-        public string Descripcion { get; set; }
-        public TipoDeFactura Tipo { get; set; }
-
-        public Factura(TipoDeFactura tipoFactura)
-        {
-            this.PrecioPorHora = int.Parse(TestContext.Parameters[$"{tipoFactura}_precio_hora"]);
-            this.CantidadHoras = int.Parse(TestContext.Parameters[$"{tipoFactura}_cantidad_horas"]);
-            this.Descripcion = TestContext.Parameters[$"{tipoFactura}_descripcion"];
-            this.Codigo = TestContext.Parameters[$"{tipoFactura}_codigo"];
-            this.CantidadItems = int.Parse(TestContext.Parameters[$"{tipoFactura}_cantidad_items"]);
-            this.Tipo = tipoFactura;
-        }
+        public string Codigo { get; set; } = TestContext.Parameters[$"{tipoFactura}_codigo"];
+        public int CantidadHoras { get; set; } = int.Parse(TestContext.Parameters[$"{tipoFactura}_cantidad_horas"]);
+        public int CantidadItems { get; set; } = int.Parse(TestContext.Parameters[$"{tipoFactura}_cantidad_items"]);
+        public int PrecioPorHora { get; set; } = int.Parse(TestContext.Parameters[$"{tipoFactura}_precio_hora"]);
+        public string Descripcion { get; set; } = TestContext.Parameters[$"{tipoFactura}_descripcion"];
+        public TipoDeFactura Tipo { get; set; } = tipoFactura;
     }
 }
