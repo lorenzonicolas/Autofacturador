@@ -10,6 +10,7 @@ using System.Threading;
 
 namespace Autofacturador
 {
+    [TestFixture]
     public partial class Tests
     {
         private string MONOTRIBUTO_URL;
@@ -22,27 +23,29 @@ namespace Autofacturador
         [SetUp]
         public void Setup()
         {
+            Assert.That(TestContext.Parameters.Count > 0);
+            
             string path = Directory.GetParent(Environment.CurrentDirectory).Parent.Parent.FullName;
 
             //Creates the ChomeDriver object, Executes tests on Google Chrome
             driver = new ChromeDriver(path + @"\drivers\");
             this.utils = new DOMUtils(driver);
-        }
-
-        [Test]
-        [TestCase("15/04/2024", TipoDeFactura.ClasesParticulares)]
-        // [TestCase("09/04/2024", TipoDeFactura.Asesoria_Performance)]
-        [TestCase("17/04/2024", TipoDeFactura.ClasesParticulares)]
-        // [TestCase("11/04/2024", TipoDeFactura.Asesoria_SeguridadWeb)]
-        [TestCase("19/04/2024", TipoDeFactura.ClasesParticulares)]
-        
-        public void GenerarFactura(string fechaComprobante, TipoDeFactura tipoFactura)
-        {
+            
             MONOTRIBUTO_URL = GetConfigKey("MONOTRIBUTO_URL");
             MAX_FACTURA_SIN_DNI = int.Parse(GetConfigKey("MAX_FACTURA_SIN_DNI"));
             CUIT = GetConfigKey("CUIT");
             ACCESS = GetConfigKey("ACCESS");
-            
+        }
+
+        [Test]
+        // [TestCase("06/05/2024", TipoDeFactura.ClasesParticulares)]
+        // [TestCase("07/05/2024", TipoDeFactura.Asesoria_SeguridadWeb)]
+        // [TestCase("08/05/2024", TipoDeFactura.ClasesParticulares)]
+        // [TestCase("09/05/2024", TipoDeFactura.Asesoria_SeguridadWeb)]
+        // [TestCase("10/05/2024", TipoDeFactura.ClasesParticulares)]
+        
+        public void GenerarFactura(string fechaComprobante, TipoDeFactura tipoFactura)
+        {            
             if (!DateTime.TryParseExact(fechaComprobante, "d", new CultureInfo("es-ES"), DateTimeStyles.AssumeLocal, out _))
             {
                 throw new Exception("Fecha invalida para la factura");
@@ -64,8 +67,8 @@ namespace Autofacturador
 
             // Assert que se creo bien
             Thread.Sleep(1500);
-            var confirmText = driver.FindElement(By.CssSelector("#botones_comprobante > b")).Text.ToLowerInvariant();
-            Assert.AreEqual("comprobante generado", confirmText);
+            var confirmText = driver.FindElement(By.CssSelector("#botones_comprobante")).Text;
+            Assert.That(confirmText.Contains("Comprobante Generado", StringComparison.OrdinalIgnoreCase));
             utils.clickOnElementByXPath("//input[@value = 'Menú Principal']");
         }
 
@@ -77,20 +80,20 @@ namespace Autofacturador
         private void Paso_4_ValidarFactura(Factura factura)
         {
             var domicilio = driver.FindElement(By.XPath("//html/body/div[2]/form/div[2]/table/tbody/tr[3]/td/table/tbody/tr[2]/td")).Text;
-            Assert.IsTrue(domicilio.ToLowerInvariant().Contains(GetConfigKey("DOMICILIO")));
+            Assert.That(domicilio.Contains(GetConfigKey("DOMICILIO"), StringComparison.OrdinalIgnoreCase));
 
             var concepto = driver.FindElement(By.XPath("//html/body/div[2]/form/div[2]/table/tbody/tr[3]/td/table/tbody/tr[3]/td")).Text;
-            Assert.AreEqual("servicios", concepto.ToLowerInvariant());
+            Assert.That("servicios".Equals(concepto, StringComparison.OrdinalIgnoreCase));
 
             var condicion2 = driver.FindElement(By.XPath("//html/body/div[2]/form/div[2]/table/tbody/tr[5]/td/table/tbody/tr[4]/td")).Text;
-            Assert.AreEqual("consumidor final", condicion2.ToLowerInvariant());
+            Assert.That("consumidor final".Equals(condicion2, StringComparison.OrdinalIgnoreCase));
 
             var total = driver.FindElement(
                 By.XPath("//html/body/div[2]/form/div[2]/table/tbody/tr[7]/td/table[2]/tbody/tr/td[2]/table/tbody/tr[3]/td/table/tbody/tr/td/b"))
                 .Text;
             var totalAsDecimal = Convert.ToDecimal(total, new CultureInfo("es-AR"));
-            Assert.AreEqual(totalAsDecimal, (decimal)(factura.PrecioPorHora * factura.CantidadHoras * factura.CantidadItems));
-            Assert.Less(totalAsDecimal, MAX_FACTURA_SIN_DNI);
+            Assert.That(totalAsDecimal.Equals(factura.PrecioPorHora * factura.CantidadHoras * factura.CantidadItems));
+            Assert.That(totalAsDecimal < MAX_FACTURA_SIN_DNI);
         }
 
         /// <summary>
@@ -117,7 +120,7 @@ namespace Autofacturador
         {
             utils.clickOnSelectElement("idivareceptor", " Consumidor Final");
             var labelText = driver.FindElement(By.XPath("//label[@for = 'formadepago1']")).Text;
-            Assert.IsTrue(labelText.ToLowerInvariant().Equals("contado"));
+            Assert.That(labelText.Equals("contado", StringComparison.OrdinalIgnoreCase));
             utils.clickOnElement("formadepago1");
             utils.clickOnElementByXPath("//input[@value = 'Continuar >']");
         }
@@ -141,6 +144,13 @@ namespace Autofacturador
         {
             // Click en mi nombre
             utils.clickOnElementByXPath("/html/body/div[2]/form/table/tbody/tr[4]/td/input[2]");
+
+            // A veces aparece este pop up
+            if(utils.elementVisible(By.Id("novolveramostrar")))
+            {
+                utils.clickOnElement("novolveramostrar");
+            }
+
             // Click en Generar comprobante
             utils.clickOnElement("btn_gen_cmp");
             // Select punto de venta
@@ -148,7 +158,7 @@ namespace Autofacturador
 
             Thread.Sleep(500);
             var selectedTipoDeComprobante = new SelectElement(driver.FindElement(By.Id("universocomprobante"))).SelectedOption.Text;
-            Assert.IsTrue(selectedTipoDeComprobante.ToLowerInvariant().Equals("factura c"));
+            Assert.That(selectedTipoDeComprobante.Equals("factura c", StringComparison.OrdinalIgnoreCase));
             utils.clickOnElementByXPath("//input[@value = 'Continuar >']");
         }
 
