@@ -79,10 +79,10 @@ namespace Autofacturador
         /// <param name="factura"></param>
         private void Paso_4_ValidarFactura(Factura factura)
         {
-            var domicilio = driver.FindElement(By.XPath("//html/body/div[2]/form/div[2]/table/tbody/tr[3]/td/table/tbody/tr[2]/td")).Text;
+            var domicilio = driver.FindElement(By.XPath("//html/body/div[2]/form/div[2]/table/tbody/tr[3]/td/table/tbody/tr[6]/td")).Text;
             Assert.That(domicilio.Contains(GetConfigKey("DOMICILIO"), StringComparison.OrdinalIgnoreCase));
 
-            var concepto = driver.FindElement(By.XPath("//html/body/div[2]/form/div[2]/table/tbody/tr[3]/td/table/tbody/tr[3]/td")).Text;
+            var concepto = driver.FindElement(By.XPath("//html/body/div[2]/form/div[2]/table/tbody/tr[3]/td/table/tbody/tr[7]/td")).Text;
             Assert.That("servicios".Equals(concepto, StringComparison.OrdinalIgnoreCase));
 
             var condicion2 = driver.FindElement(By.XPath("//html/body/div[2]/form/div[2]/table/tbody/tr[5]/td/table/tbody/tr[4]/td")).Text;
@@ -153,6 +153,13 @@ namespace Autofacturador
 
             // Click en Generar comprobante
             utils.clickOnElement("btn_gen_cmp");
+
+            // A veces aparece este pop up
+            if(utils.elementVisible(By.Id("novolveramostrar")))
+            {
+                utils.clickOnElement("novolveramostrar");
+            }
+
             // Select punto de venta
             utils.clickOnSelectElement("puntodeventa", GetConfigKey("PUNTO_DE_VENTA"));
 
