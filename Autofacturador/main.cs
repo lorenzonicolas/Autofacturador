@@ -25,10 +25,8 @@ namespace Autofacturador
         {
             Assert.That(TestContext.Parameters.Count > 0);
             
-            string path = Directory.GetParent(Environment.CurrentDirectory).Parent.Parent.FullName;
-
             //Creates the ChomeDriver object, Executes tests on Google Chrome
-            driver = new ChromeDriver(path + @"\drivers\");
+            driver = new ChromeDriver(Environment.CurrentDirectory);
             this.utils = new DOMUtils(driver);
             
             MONOTRIBUTO_URL = GetConfigKey("MONOTRIBUTO_URL");
@@ -49,6 +47,11 @@ namespace Autofacturador
             if (!DateTime.TryParseExact(fechaComprobante, "d", new CultureInfo("es-ES"), DateTimeStyles.AssumeLocal, out _))
             {
                 throw new Exception("Fecha invalida para la factura");
+            }
+
+            if ((DateTime.Now - DateTime.ParseExact(fechaComprobante, "d", new CultureInfo("es-ES"), DateTimeStyles.AssumeLocal)).TotalDays > 7)
+            {
+                throw new Exception("Fecha invalida para la factura: es de mas de una semana de antiguedad");
             }
 
             var factura = new Factura(tipoFactura);
