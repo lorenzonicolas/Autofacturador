@@ -5,7 +5,6 @@ using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Support.UI;
 using System;
 using System.Globalization;
-using System.IO;
 using System.Threading;
 
 namespace Autofacturador
